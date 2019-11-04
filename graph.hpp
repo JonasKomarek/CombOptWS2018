@@ -80,7 +80,7 @@ public:
 
 	VertexId const & vertex1() const;
 	VertexId const & vertex2() const;
-	// returns the endpoint which is not Vertex
+	// returns the endpoint which is not Vertex v
 	VertexId const & other_vertex(VertexId v) const;
 	
 	// checks whether this edge is adjazant with  vertex1

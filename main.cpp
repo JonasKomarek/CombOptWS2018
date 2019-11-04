@@ -6,26 +6,25 @@
 // Convenience. If you don't understand just ignore ;)
 using namespace DHBW;
 
-
 // What do I do?
-// The '&' in  front of g ensures that we do not copy g, 
+// The '&' in  front of g ensures that we do not copy g,
 // it will be exactly the same Graph g as outside of this function
-VertexId example_function1(Graph & g)
+VertexId example_function1(Graph &g)
 {
 	// This method is written unneccessary compliceted to give a better feeling of the use of this class
-	// EdgeId and GraphId are internally just the same as unsigned int's. I prefer using the aliases for 
+	// EdgeId and GraphId are internally just the same as unsigned int's. I prefer using the aliases for
 	// better readability.
 	EdgeId a;
 	for (VertexId i = 0; i < g.num_vertices(); ++i)
 	{
 		// Get the i-th vertex
-		Vertex & v = g.vertex(i);
+		Vertex &v = g.vertex(i);
 		EdgeId b = 0;
-		for (EdgeId e = 0;  e < v.num_edges(); ++ e)
+		for (EdgeId e = 0; e < v.num_edges(); ++e)
 		{
 			++b;
 		}
-		if ( b > a)
+		if (b > a)
 		{
 			a = b;
 		}
@@ -35,23 +34,23 @@ VertexId example_function1(Graph & g)
 
 // A vector is a kind of an dynamic_array. std::vector<VertexId> is a vector of VertexIds
 // Random path starting at s and ending in t
-std::vector<VertexId> random_path(Graph & g, VertexId s, VertexId t)
+std::vector<VertexId> random_path(Graph &g, VertexId s, VertexId t)
 {
 	// Create empty vector
 	std::vector<VertexId> path;
 	// add first vertex, i.e. s, (represented by its id)
 	path.push_back(s);
-	
+
 	// random walk :D
 	VertexId current = s;
 	while (current != t)
 	{
 		// Get vertex from VertexId
-		Vertex & v = g.vertex(current);
+		Vertex &v = g.vertex(current);
 		// Ask for number of edges
 		EdgeId num_edges = v.num_edges();
 		// compute random integer in [0,num_edges-1]
-		EdgeId rand_id = rand()%num_edges;
+		EdgeId rand_id = rand() % num_edges;
 		// Take edge (first take id from v, than get edge from g)
 		Edge next_edge = g.edge(v.edge(rand_id));
 		// Compute next vertex
