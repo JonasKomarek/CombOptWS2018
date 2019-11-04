@@ -1,5 +1,5 @@
-CXX=clang++ 
-CXXFLAGS=-Wall -pedantic -Werror -std=c++11 -pipe
+CXX=g++ 
+CXXFLAGS=-Wall -pedantic -Werror -std=c++11 -pipe -Wl,--stack,600000000
 
 all: debug 
 
