@@ -2,6 +2,7 @@
 #include "randomgraph.hpp"
 #include <iostream>
 #include <time.h>
+#include <cstring>
 
 // Convenience. If you don't understand just ignore ;)
 using namespace DHBW;
@@ -60,6 +61,65 @@ std::vector<VertexId> random_path(Graph &g, VertexId s, VertexId t)
 	return path;
 }
 
+// used for findConnectedComponents()
+// works in general like visit1()
+void visit(Graph &g, std::vector<bool> &visited, std::vector<VertexId> &connComponent, VertexId v_id)
+{
+	Vertex &currVertex = g.vertex(v_id);
+	visited[v_id] = 1;
+	for (EdgeId j = 0; j < currVertex.num_edges(); ++j)
+	{
+		Edge e = g.edge(currVertex.edge(j));
+		// if edge is outgoing continue
+		VertexId neighbour_id = e.other_vertex(currVertex.id());
+		if (0 == visited[neighbour_id])
+		{
+			visit(g, visited, connComponent, neighbour_id);
+		}
+		else
+		{
+			continue;
+		}
+	}
+	// add vertex to the connected component
+	connComponent.push_back(v_id);
+}
+
+// recursive way for finding connected components
+void findConnectedComponents(Graph &g, bool printToStdOut = false)
+{
+	std::vector<bool> visited(g.num_vertices(), 0);
+	// to store connected components
+	std::vector<std::vector<VertexId>> connectedComps;
+
+	for (VertexId i = 0; i < g.num_vertices(); ++i)
+	{
+		if (1 != visited[i])
+		{
+			connectedComps.push_back(std::vector<EdgeId>());
+			visit(g, visited, connectedComps.back(), i);
+		}
+		else
+		{
+			continue;
+		}
+	}
+
+	std::cout << connectedComps.size();
+	if (printToStdOut != false)
+	{
+		for (VertexId row = 0; row <= connectedComps.size(); row++)
+		{
+			std::cout << "\n";
+			for (VertexId col = 0; col < connectedComps[row].size(); col++)
+			{
+				std::cout << connectedComps[row][col] << " ";
+			}
+		}
+	}
+}
+
+// vertices are visited in correct edge direction and numbered
 void visit1(Graph &g, std::vector<bool> &visited, VertexId &vertexCounter, std::vector<VertexId> &numberedVertices, VertexId v_id)
 {
 	Vertex &currVertex = g.vertex(v_id);
@@ -89,6 +149,7 @@ void visit1(Graph &g, std::vector<bool> &visited, VertexId &vertexCounter, std::
 	++vertexCounter;
 }
 
+// vertices are visited in incorrect edge direction and added to the component
 void visit2(Graph &g, std::vector<bool> &visited, std::vector<VertexId> &connComponent, VertexId v_id)
 {
 	Vertex &currVertex = g.vertex(v_id);
@@ -118,7 +179,7 @@ void visit2(Graph &g, std::vector<bool> &visited, std::vector<VertexId> &connCom
 	connComponent.push_back(v_id);
 }
 
-void tarjans(Graph &g, bool printToStdIn = false)
+void tarjans(Graph &g, bool printToStdOut = false)
 {
 	std::vector<bool> visited(g.num_vertices(), 0);
 	// counter to number vertices in first run
@@ -159,7 +220,7 @@ void tarjans(Graph &g, bool printToStdIn = false)
 	}
 
 	std::cout << connectedComps.size();
-	if (printToStdIn != false)
+	if (printToStdOut != false)
 	{
 		for (VertexId row = 0; row <= connectedComps.size(); row++)
 		{
@@ -172,13 +233,46 @@ void tarjans(Graph &g, bool printToStdIn = false)
 	}
 }
 
-int main()
+// first argument (required): input file (contains graph)
+// second argument (optional): 'true', if resulting components should be printed to stdout
+// third argument (optional): 'false', if input graph is undirected (or only connected components are searched)
+int main(int argc, char *argv[])
 {
+	bool print = false;
+	bool digraph = true;
+	// check if input file is given as argument
+	if (argc < 2 || argv[1] == nullptr)
+	{
+		std::cerr << "No input file given!";
+	}
+	// check if result should be printed
+	if (argc > 2 && strcmp(argv[2], "true") == 0)
+	{
+		print = true;
+	}
+	// check if edges should be seen as undirected (find connected components)
+	if (argc > 3 && strcmp(argv[3], "false") == 0)
+	{
+		digraph = false;
+	}
+
+	// for measure of duration
 	clock_t start, end;
 	start = clock();
 	// Read graph from input file
-	Graph g("input/digraph8.plain");
-	tarjans(g, false);
+	Graph g(argv[1]);
+	if (digraph == true)
+	{
+		//find strongly connected components
+		tarjans(g, print);
+	}
+	else
+	{
+		findConnectedComponents(g, print);
+	}
+
 	end = clock();
-	std::cout << "\nTime (in ms): " << end - start;
+	std::cout << "\nTime: " << end - start;
+
+	return 0;
 }
